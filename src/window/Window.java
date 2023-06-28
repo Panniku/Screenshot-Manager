@@ -72,10 +72,13 @@ import renderer.themed.ThemedJScrollPane;
 import themes.Palette;
 import utils.CopyImagetoClipBoard;
 import utils.Logger;
-import window.dialog.LayoutDialog;
 import window.dialog.WindowSettings;
+import window.dialog.layout.AddLayoutDialog;
+import window.dialog.layout.LayoutDialog;
 
 // C:\\Users\\Panniku\\Pictures\\Screenshotter\\Snap_17062023_171751.png
+//C:\Users\Panniku\Pictures\Screenshotter\Snap_23062023_171729.png
+//C:\Users\Panniku\Pictures\Screenshotter\Snap_24062023_192018.png
 public class Window {
 	//
 	public static JFrame window;
@@ -114,7 +117,7 @@ public class Window {
 	ConfigHandler config;
 	static String imgPath;
 	File configFile;
-	ArrayList<Layouts> layoutData;
+	static ArrayList<Layouts> layoutData;
 	//
 	static Logger logger;
 	public static GlobalKeyboardHook keyboardHook;
@@ -328,7 +331,6 @@ public class Window {
 		        };
 		    }
 		});
-
 		splitPane.setBorder(null);
 		
 		textPane = new JTextPane();
@@ -876,6 +878,10 @@ public class Window {
 		return window;
 	}
 	
+	public static ArrayList<Layouts> getLayouts(){
+		return layoutData;
+	}
+	
 	public static void setPreviewImage(String path) {
 		try {
 			ImageIcon ic = new ImageIcon(ImageIO.read(new File(path)));
@@ -900,7 +906,7 @@ public class Window {
 	//
 	// 
 	
-	public static void print(String string) {
+	public static void print(Object string) {
 		System.out.println(string);
 	}
 

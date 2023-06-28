@@ -25,6 +25,8 @@ public class CenteredPanel extends JPanel {
     
     public void setImage(Image image) {
     	this.image = image;
+    	this.repaint();
+    	this.revalidate();
     }
     
     public Image getImage() {

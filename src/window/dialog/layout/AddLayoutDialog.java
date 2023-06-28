@@ -1,4 +1,4 @@
-package window.dialog;
+package window.dialog.layout;
 
 import javax.swing.*;
 
@@ -19,7 +19,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.event.WindowStateListener;
 
-public class LayoutDialog extends JDialog {
+public class AddLayoutDialog extends JDialog {
 
     JPanel root, container;
     //
@@ -34,7 +34,7 @@ public class LayoutDialog extends JDialog {
     
     //private boolean confirmed;
 
-    public LayoutDialog(JFrame parent) {
+    public AddLayoutDialog(JFrame parent) {
         super(parent, "Add new Layout", true);
         setSize(200, 200);
         setResizable(false);
@@ -66,6 +66,7 @@ public class LayoutDialog extends JDialog {
         y2s = new JSpinner(new SpinnerNumberModel(0, 0, 100, 1));
 
         
+        container.add(setLayoutToParent(new JLabel("Name"), layoutName));
         container.add(setLayoutToParent(new JLabel(), drawLayout));
         container.add(setLayoutToParent(new JLabel("x1"), x1s));
         container.add(setLayoutToParent(new JLabel("y1"), y1s));
@@ -90,7 +91,6 @@ public class LayoutDialog extends JDialog {
         layoutName.setFocusable(true);
         layoutName.requestFocusInWindow();
 
-        pack();
         setLocationRelativeTo(parent);
 
         addWindowListener(new WindowAdapter() {
