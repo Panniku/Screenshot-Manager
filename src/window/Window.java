@@ -73,7 +73,7 @@ import themes.Palette;
 import utils.CopyImagetoClipBoard;
 import utils.Logger;
 import window.dialog.WindowSettings;
-import window.dialog.layout.AddLayoutDialog;
+import window.dialog.layout.EditLayoutDialog;
 import window.dialog.layout.LayoutDialog;
 
 // C:\\Users\\Panniku\\Pictures\\Screenshotter\\Snap_17062023_171751.png
@@ -86,7 +86,7 @@ public class Window {
 	JToolBar toolbar;
 	// toolbar items
 	JButton snap;
-	JComboBox<Layouts> mode;
+	static JComboBox<Layouts> layoutSelector;
 	JButton editLayouts;
 	JTextField coordinates;
 	JToggleButton hide;
@@ -114,7 +114,7 @@ public class Window {
 	//
 	//DefaultTableModel tableModel;
 	// Data
-	ConfigHandler config;
+	public static ConfigHandler config;
 	static String imgPath;
 	File configFile;
 	static ArrayList<Layouts> layoutData;
@@ -130,7 +130,6 @@ public class Window {
 	public static String temppath;
 	static int count = 0;
 	static boolean userClicked=false;
-	static int layoutEnd=0;
 	static boolean consumed = true;
 	
 	Window() {
@@ -200,12 +199,12 @@ public class Window {
 		snap.setPreferredSize(new Dimension(20, 20));
 		snap.setBackground(Color.decode(Palette.gray800));
 		
-		mode = new ThemedJComboBox();
-		mode.setBorder(BorderFactory.createLineBorder(Color.decode(Palette.gray500)));
-		mode.setToolTipText("<html>Select screenshot layout/cropping mode.</html>");	
-		mode.setPreferredSize(new Dimension(100, 20));
-		mode.setMaximumSize(new Dimension(100, 20));
-		mode.setOpaque(false);
+		layoutSelector = new ThemedJComboBox();
+		layoutSelector.setBorder(BorderFactory.createLineBorder(Color.decode(Palette.gray500)));
+		layoutSelector.setToolTipText("<html>Select screenshot layout/cropping mode.</html>");	
+		layoutSelector.setPreferredSize(new Dimension(100, 20));
+		layoutSelector.setMaximumSize(new Dimension(100, 20));
+		layoutSelector.setOpaque(false);
 
 		
 		coordinates = new JTextField();
@@ -433,29 +432,7 @@ public class Window {
 				//print(String.valueOf(item));
 				if(item == 0) {
 					
-
-					JFrame snap = new JFrame();
-					snap.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-					snap.setUndecorated(true);
-					snap.setExtendedState(JFrame.MAXIMIZED_BOTH);
-					snap.setVisible(true);
-					snap.setLocationRelativeTo(null);
-					snap.setAlwaysOnTop(true);
-
-					
-					if(shouldHide) {
-						window.setState(JFrame.ICONIFIED);
-					}
-					
 					SelectionSnap snapper = new SelectionSnap();
-					snapper.setParentWindow(snap);
-					snap.add(snapper);
-
-					snapper.snap();
-					snapper.revalidate();
-					snapper.repaint();
-				    
-				    // the window state is returned normal in the SelectionSnap() code
 				    
 				} else if(item == 1) {
 					Rectangle rect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
@@ -471,14 +448,13 @@ public class Window {
 			}
 		});
 		
-		mode.addActionListener(new ActionListener() {
-			
+		layoutSelector.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				item = mode.getSelectedIndex();
-				//print(String.valueOf(item));
+				item = layoutSelector.getSelectedIndex();
+				print(String.valueOf(item));
 				logger.logA("Selected: ");
-				logger.logS(layoutData.get(item).getName() + "\n");
+				logger.logS(layoutSelector.getItemAt(item) + "\n");
 				if(item == 0) { // Free form
 					coordinates.setText("Freeform selection");
 					snap.setIcon(new FontIcon().of(BoxiconsRegular.SELECTION, 15, Color.decode(Palette.gray500)));
@@ -487,18 +463,13 @@ public class Window {
 					coordinates.setText("Entire display");
 					snap.setIcon(new FontIcon().of(BoxiconsRegular.WINDOW, 15,Color.decode(Palette.gray500)));
 					//snap.setSelectedIcon(new FontIcon().of(BoxiconsRegular.WINDOW, 15, new Color(68, 110, 158)));
-				} 
-//				else if(item == layoutEnd-1){
-//					print("hit the end");
-//				}
-				else {
+				} else {
 					snap.setIcon(new FontIcon().of(BoxiconsRegular.IMAGE_ADD, 15, Color.decode(Palette.gray500)));
 					//snap.setSelectedIcon(new FontIcon().of(BoxiconsRegular.IMAGE_ADD, 15, new Color(68, 110, 158)));
+					print("i hate you: " + layoutData);
 					String[] coords = layoutData.get(item).getCoords();
 					coordinates.setText(coords[0]+","+coords[1]+","+coords[2]+","+coords[3]);
 				}
-				//logger.logW("isRegistered: "+ GlobalScreen.isNativeHookRegistered() + "\n");
-				
 			}
 		});
 		
@@ -636,8 +607,7 @@ public class Window {
 		layoutData.add(1, new Layouts("Fullscreen", null));
 		layoutData.forEach(layout -> {
 			//print(layout.toString());
-			mode.addItem(layout);
-			layoutEnd++;
+			layoutSelector.addItem(layout);
 		});
 		//print(String.valueOf(layoutEnd));
 		//Layouts add = new Layouts("Add new", null);
@@ -656,7 +626,7 @@ public class Window {
 		toolbar.addSeparator();
 		toolbar.add(snap);
 		toolbar.addSeparator();
-		toolbar.add(mode);
+		toolbar.add(layoutSelector);
 		toolbar.addSeparator();
 		toolbar.add(coordinates);
 		toolbar.add(editLayouts);
@@ -808,18 +778,32 @@ public class Window {
         logPanel.repaint();
     }
 	
+	public static void updateMode() {
+		ActionListener l = layoutSelector.getActionListeners()[0];
+		layoutSelector.removeActionListener(l);
+		//
+		//print("c:" + config.getLayouts());
+		layoutData = config.getLayouts();
+		//print("l: " + layoutData);
+		//String[] ff = {"0", "0", "0", "0"};
+		//String[] fs = {"0", "0", "0", "0"};
+		layoutData.add(0, new Layouts("Freeform", null));
+		layoutData.add(1, new Layouts("Fullscreen", null));
+		//print("l p : " + layoutData);
+		layoutSelector.removeAllItems();
+		layoutData.forEach(layout -> {
+			print(layout);
+			layoutSelector.addItem(layout);
+		});
+		//print("s: " + layoutData.size());
+		layoutSelector.addActionListener(l);
+	}
+	
 	//
-//	static public Rectangle getScreenTotalArea(Window windowOrNull) {
-//	    Rectangle bounds;
-//	    if (windowOrNull == null) {
-//	        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-//	        bounds = ge.getDefaultScreenDevice().getDefaultConfiguration().getBounds();
-//	    } else {
-//	        GraphicsConfiguration gc = windowOrNull.getGraphicsConfiguration();
-//	        bounds = gc.getBounds();
-//	    }
-//	    return bounds;
-//	}
+	//
+	//
+	//
+	//
 	
 	//
 	public static Rectangle getMaximumScreenBounds() {
@@ -869,6 +853,8 @@ public class Window {
 		String datetime = date + " " + strResult;
 		return datetime;
 	}
+	
+	//
 	
 	public static Logger getLogger() {
 		return logger;

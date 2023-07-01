@@ -71,7 +71,7 @@ public class ThemedJComboBox extends JComboBox {
         @Override
         public void paintCurrentValueBackground(Graphics g, Rectangle bounds, boolean hasFocus) {
             // Override the method to set a different color for the main component's background
-            g.setColor(Color.GREEN);
+            //g.setColor(Color.GREEN);
             g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         }
 
@@ -93,7 +93,8 @@ public class ThemedJComboBox extends JComboBox {
                 
                 //list.setBorder(BorderFactory.createLineBorder(Color.decode(Palette.gray500)));
                 setForeground(Color.decode(Palette.gray500));
-                if(isSelected) { 	
+                if(isSelected) {
+                	setForeground(Color.decode(Palette.gray50));
                     setBackground(Color.decode(Palette.gray600));
                 } else {
                 	setForeground(Color.decode(Palette.gray500));
