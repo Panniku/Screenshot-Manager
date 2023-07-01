@@ -3,9 +3,12 @@ package renderer;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dialog;
+import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
@@ -14,16 +17,19 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import constructors.Layouts;
 import lc.kra.system.keyboard.event.GlobalKeyAdapter;
 import lc.kra.system.keyboard.event.GlobalKeyEvent;
 import window.Window;
 
-//import SnippingTool.CenteredImagePanel;
-
-public class SelectionSnap extends JPanel {
+public class DrawNewLayout extends JPanel {
+	
+	private DrawNewLayoutCallback callback;
 	
 	private Rectangle selectionBounds;
     private int selectionStartX;
@@ -31,48 +37,51 @@ public class SelectionSnap extends JPanel {
     private Cursor customCursor;
     Robot robot;
     
-    BufferedImage tempimg, saveimg;
-    
+    Image img;
+
     JFrame root;
+    //
+    JFrame parent;
+    JDialog dialog;
+
+    int finalize;
+    Layouts newLayout;
+    String name;
     
-    public SelectionSnap() {
+    public DrawNewLayout(JFrame parent, JDialog dialog, String name, DrawNewLayoutCallback callback) {
         try {
              robot = new Robot();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        this.parent = parent;
+        this.dialog = dialog;
+        this.name = name;
+        this.callback = callback;
+        //
+        //parent.setVisible(false);
+        parent.setState(JFrame.ICONIFIED);
+        dialog.setVisible(false);
+        
         
         root = new JFrame();
-		root.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		root.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		root.setUndecorated(true);
 		root.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		root.setVisible(true);
 		root.setLocationRelativeTo(null);
 		//root.setAlwaysOnTop(true);
-
-		
-		if(Window.shouldHide) {
-			Window.window.setState(JFrame.ICONIFIED);
-		}
-
 		root.add(this);
 
-		snap();
+		img = snap();
 		revalidate();
 		repaint();
-        
+		
         setLayout(null);
         customCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
         setCursor(customCursor);
         
-        Window.keyboardHook.addKeyListener(new GlobalKeyAdapter() {
-        	@Override
-        	public void keyPressed(GlobalKeyEvent event) {
-        		if(event.getVirtualKeyCode() == GlobalKeyEvent.VK_ESCAPE) {
-        			forceDown();
-        		}
-        	}
-        });
+        JOptionPane.showMessageDialog(null, "Click and drag to make selection.\nOnce selected, Click \"OK\" to finalize layout selection.");
         
         
         addMouseListener(new MouseAdapter() {
@@ -81,32 +90,32 @@ public class SelectionSnap extends JPanel {
             }
 
             public void mouseReleased(MouseEvent e) {
-                int x = (int) selectionBounds.getX();
-                int y = (int) selectionBounds.getY();
-                int w = (int) selectionBounds.getWidth();
-                int h = (int) selectionBounds.getHeight();
-
-                if(w == 0 || h == 0) {
-                	//Window.print(String.valueOf(x + " " + y + " "+ w + " " + h));
-                	stopSelectionAbrupt();
-                	Window.getLogger().logW("Selection is invalid or too small\n");
-                }
-                
-                if(w > 16 && h > 16) {
-                	Window.getLogger().logS("Selected Bounds: ");
-                    Window.getLogger().logA(w + "x" + h + "\n");
-                	//Window.print(String.valueOf(x + " " + y + " "+ w + " " + h));
-                	try {
-                		BufferedImage img = tempimg.getSubimage(x, y, w, h);
-                		saveimg = img;
-                		stopSelection();
-                	} catch (Exception e1) {
-                		e1.printStackTrace(); // do nothing.
-                	}
-                    
-                } else {
-                	startSelection(e.getX(), e.getY());
-                }
+            	finalize = JOptionPane.showConfirmDialog(null, "Confirm selection?", "DrawNewLayout", JOptionPane.YES_NO_CANCEL_OPTION);
+            	switch(finalize) {
+            		case JOptionPane.YES_OPTION:
+            			String x = String.valueOf((int) selectionBounds.getX());
+            			String y = String.valueOf((int) selectionBounds.getY());
+            			String w = String.valueOf((int) selectionBounds.getMaxX());
+            			String h = String.valueOf((int) selectionBounds.getMaxY());
+            			String[] obj = {x, y, w, h};
+            			//
+            			Window.print(obj[0] + " " + obj[1] + " " + obj[2] + " " + obj[3]);
+            			newLayout = new Layouts(name, obj);
+            			setNewLayout(newLayout);
+            			callback.onLayoutAdded(newLayout);
+            			stop();
+            			break;
+            			
+            		case JOptionPane.NO_OPTION:
+            			startSelection(e.getX(), e.getY());
+            			break;
+            			
+            		case JOptionPane.CANCEL_OPTION:
+            			//Window.print(Window.getFormattedDateTime() + "done sel");
+            			stop();
+            			break;
+            			
+            	}
             }
         });
 
@@ -120,6 +129,7 @@ public class SelectionSnap extends JPanel {
     }
 
     public void startSelection(int x, int y) {
+    	repaint();
     	//Window.window.setVisible(false);
     	
         selectionStartX = x;
@@ -138,29 +148,20 @@ public class SelectionSnap extends JPanel {
         selectionBounds.setBounds(startX, startY, width, height);
         repaint();
     }
-
-    public void stopSelection() {
-        selectionBounds = null;
-	    setCursor(null);
-	    
-	    if(saveimg != null) {
-	    	root.dispose();
-	        Window.saveScreenShot(saveimg);
-	        if(Window.shouldHide) Window.window.setState(JFrame.NORMAL);
-	    }
-        repaint();
-    }
     
-    public void stopSelectionAbrupt() {
+    public void stop() {
     	root.dispose();
-    	Window.window.setState(JFrame.NORMAL);
+    	parent.setState(JFrame.NORMAL);
+    	dialog.setVisible(true);
+    	
+    	//Window.window.setState(JFrame.NORMAL);
     }
 
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         
-        g2d.drawImage(tempimg, 0, 0, getWidth(), getHeight(), null);
+        g2d.drawImage(img, 0, 0, getWidth(), getHeight(), null);
         
         // Apply a slightly dark overlay
         g2d.setColor(new Color(0, 0, 0, 64)); // Black with transparency
@@ -187,14 +188,25 @@ public class SelectionSnap extends JPanel {
     public void setCursor(Cursor cursor) {
         super.setCursor(customCursor);
     }
-    
-    public void snap() {
-    	BufferedImage img = robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
-        tempimg = img;
+    	
+    public Image snap() {
+    	return robot.createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
     }
     
-    public void forceDown() {
-    	stopSelectionAbrupt();
-		Window.getLogger().logS("Stopped selection\n");
+    public void setName(String name) {
+    	this.name = name;
     }
+    
+    public void setNewLayout(Layouts newLayout) {
+    	this.newLayout = newLayout;
+    }
+    
+    public Layouts getNewLayout() {
+    	return newLayout;
+    }
+    
+    public interface DrawNewLayoutCallback {
+        void onLayoutAdded(Layouts newLayout);
+    }
+    
 }
