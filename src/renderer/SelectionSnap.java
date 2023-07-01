@@ -33,7 +33,7 @@ public class SelectionSnap extends JPanel {
     
     BufferedImage tempimg, saveimg;
     
-    JFrame root;
+    JFrame parent;
     
     public SelectionSnap() {
         try {
@@ -41,25 +41,6 @@ public class SelectionSnap extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        root = new JFrame();
-		root.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		root.setUndecorated(true);
-		root.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		root.setVisible(true);
-		root.setLocationRelativeTo(null);
-		//root.setAlwaysOnTop(true);
-
-		
-		if(Window.shouldHide) {
-			Window.window.setState(JFrame.ICONIFIED);
-		}
-
-		root.add(this);
-
-		snap();
-		revalidate();
-		repaint();
         
         setLayout(null);
         customCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
@@ -144,7 +125,7 @@ public class SelectionSnap extends JPanel {
 	    setCursor(null);
 	    
 	    if(saveimg != null) {
-	    	root.dispose();
+	    	parent.dispose();
 	        Window.saveScreenShot(saveimg);
 	        if(Window.shouldHide) Window.window.setState(JFrame.NORMAL);
 	    }
@@ -152,7 +133,7 @@ public class SelectionSnap extends JPanel {
     }
     
     public void stopSelectionAbrupt() {
-    	root.dispose();
+    	parent.dispose();
     	Window.window.setState(JFrame.NORMAL);
     }
 
@@ -186,6 +167,10 @@ public class SelectionSnap extends JPanel {
     @Override
     public void setCursor(Cursor cursor) {
         super.setCursor(customCursor);
+    }
+
+    public void setParentWindow(JFrame parent) {
+    	this.parent = parent;
     }
     
     public void snap() {

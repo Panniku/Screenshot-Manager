@@ -19,7 +19,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.event.WindowStateListener;
 
-public class EditLayoutDialog extends JDialog {
+public class AddLayoutDialog extends JDialog {
 
     JPanel root, container;
     //
@@ -32,14 +32,10 @@ public class EditLayoutDialog extends JDialog {
     
     static String name;
     
-    private boolean isEdit;
+    //private boolean confirmed;
 
-    public EditLayoutDialog(JFrame parent, boolean isEdit) {
-    	super(parent, true);
-    	this.isEdit = isEdit;
-    	if(isEdit) setTitle("Edit Layout");
-    	else setTitle("Add new layout");
-    	
+    public AddLayoutDialog(JFrame parent) {
+        super(parent, "Add new Layout", true);
         setSize(200, 200);
         setResizable(false);
         setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
@@ -83,35 +79,6 @@ public class EditLayoutDialog extends JDialog {
         ok = new JButton("OK");
         cancel = new JButton("Cancel");
         //
-        //
-        
-        drawLayout.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-        
-        ok.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-        cancel.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-        //
-        //
 
         buttonPanel.add(ok);
         buttonPanel.add(cancel);
@@ -119,9 +86,20 @@ public class EditLayoutDialog extends JDialog {
 
         root.add(container, BorderLayout.CENTER);
         root.add(buttonContainer, BorderLayout.SOUTH);
-        //
         setContentPane(root);
-        setLocationRelativeTo(parent);        
+
+        layoutName.setFocusable(true);
+        layoutName.requestFocusInWindow();
+
+        setLocationRelativeTo(parent);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                layoutName.requestFocusInWindow();
+            }
+        });
+        
         setVisible(true);
 
     }

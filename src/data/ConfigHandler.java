@@ -130,7 +130,6 @@ public class ConfigHandler {
 			BufferedReader reader = new BufferedReader(fr);
 			String line = null;
 			if(layoutFile.length() != 0) {
-				layouts.clear();
 				while((line = reader.readLine()) != null) {
 					
 					layouts.add(line);
@@ -167,9 +166,8 @@ public class ConfigHandler {
 	//
 	public void readLayouts(){
 		//Window.print(String.valueOf(layouts.size()));
-		layoutArray.clear();
 		layouts.forEach(layout -> {
-			String[] split = layout.split("\\s+"); // [Layout] [0,0,0,0]
+			String[] split = layout.split("\\s+"); // [Nothing] [0,0,0,0]
 			String name = split[0];
 			String[] coords = split[1].split(","); // [0][0][0][0]
 			//Window.print(split + " // " + name + " // " + coords);
@@ -177,30 +175,6 @@ public class ConfigHandler {
 			layoutArray.add(new Layouts(name, coords)); // This initializes the Layouts class with every layout
 			//Window.print( " size: "+String.valueOf(layoutArray.size()));
 		});
-	}
-	
-	public void writeNewLayout(Layouts layout) {
-		try {
-			String name = layout.getName();
-			String x = layout.getCoords()[0];
-			String y = layout.getCoords()[1];
-			String w = layout.getCoords()[2];
-			String h = layout.getCoords()[3];
-			String coords = x + "," + y + "," + w + "," + h;
-			String str = name + " " + coords;
-			//
-			FileWriter writer = new FileWriter(layoutFile, true);
-			writer.write("\n");
-			writer.write(str);
-			writer.close();
-			
-			readLayoutFile();
-			readLayouts();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.logE("Failed to append " + layout.getName() + ".\n");
-		}
 	}
 	
 	
