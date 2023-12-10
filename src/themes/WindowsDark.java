@@ -1,16 +1,16 @@
 package themes;
 
-import com.formdev.flatlaf.FlatDarkLaf;
+// import com.formdev.flatlaf.FlatDarkLaf;
 
-public class WindowsDark extends FlatDarkLaf {
+public class WindowsDark {
 	
-	public static boolean setup() {
-        return setup( new WindowsDark() );
-    }
+	//public static boolean setup() {
+       // return setup( new WindowsDark() );
+    //}
 
-    @Override
-    public String getName() {
-        return "WindowsDark";
-    }
+    //@Override
+    //public String getName() {
+        //return "WindowsDark";
+    //}
     
 }

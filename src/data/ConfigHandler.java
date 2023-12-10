@@ -181,13 +181,7 @@ public class ConfigHandler {
 	
 	public void writeNewLayout(Layouts layout) {
 		try {
-			String name = layout.getName();
-			String x = layout.getCoords()[0];
-			String y = layout.getCoords()[1];
-			String w = layout.getCoords()[2];
-			String h = layout.getCoords()[3];
-			String coords = x + "," + y + "," + w + "," + h;
-			String str = name + " " + coords;
+			String str = layoutToString(layout);
 			//
 			FileWriter writer = new FileWriter(layoutFile, true);
 			writer.write("\n");
@@ -203,14 +197,35 @@ public class ConfigHandler {
 		}
 	}
 	
-	
-//	public ImageIcon getLayoutIcon(int i) {
-//		return null;
-//	}
-	
-//	public String getLayoutName(int i) {
-//		return layoutNames.get(i).get
-//	}
+	public void deleteLayout(Layouts layout) {
+		try {
+			String str = layoutToString(layout);
+			//
+			String current;
+			boolean lineRemoved;
+			
+			//
+			FileReader reader = new FileReader(layoutFile);
+			FileWriter writer = new FileWriter(layoutFile, true);
+			
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			logger.logE("Fail\n");
+		}
+	}
+
+	public String layoutToString(Layouts layout) {
+		String name = layout.getName();
+		String x = layout.getCoords()[0];
+		String y = layout.getCoords()[1];
+		String w = layout.getCoords()[2];
+		String h = layout.getCoords()[3];
+		String coords = x + "," + y + "," + w + "," + h;
+		String str = name + " " + coords;
+		return str;
+	}
 	
 	public ArrayList<Layouts> getLayouts(){
 		return layoutArray;

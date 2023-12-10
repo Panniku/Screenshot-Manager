@@ -88,7 +88,7 @@ public class LayoutDialog extends JDialog{
 		root = new JPanel();
 		root.setLayout(new BorderLayout());
 	      
-	      
+		//
 	      
 		layoutListPanel = new JPanel();
 		layoutListPanel.setLayout(new BorderLayout());

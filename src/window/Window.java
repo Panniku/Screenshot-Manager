@@ -770,10 +770,14 @@ public class Window {
 
         count++;
         imgCount.setText("Snaps taken: " + count);
+        
+//        if(logPanel.countComponents() >= 150) {
+//        	logPanel.remove(logPanel.getComponent(0));
+//        	Window.logger.logW("Cleared image logger to be within 150 items.\n");
+//        }
         logPanel.add(logger);
         
         setPreviewImage(path);
-        
         logPanel.revalidate();
         logPanel.repaint();
     }
